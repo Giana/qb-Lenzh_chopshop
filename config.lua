@@ -7,7 +7,7 @@ Config.MarkerColor = { r = 255, g = 0, b = 0 }                      -- Marker co
 
 Config.Timer = 2                                                    -- Minutes player is marked after chopping
 
-Config.CooldownMinutes = 1                                         -- Minimum cooldown between chops
+Config.CooldownMinutes = 10                                         -- Minimum cooldown between chops
 
 Config.CallCopsPercent = 25                                         -- Percentage chance cops are called for chopping
 Config.CopsRequired = 1                                             -- Cops required on duty to chop
@@ -17,7 +17,7 @@ Config.NPCEnable = true                                             -- true == N
 Config.NPCHash = 68070371                                           -- NPC ped hash
 Config.NPCShop = { x = -55.42, y = 6392.8, z = 30.5, h = 46.0 }     -- Location of NPC for shop
 
-Config.RemovePart = 2           -- Seconds to remove part
+Config.RemovePart = 2                    -- Seconds to remove part
 
 Config.SellAll = true                    -- true == sell all of item when clicked in menu, false == sell 1 of item when clicked in menu
 Config.MoneyType = 'cash'                -- Money type to reward for sold parts
