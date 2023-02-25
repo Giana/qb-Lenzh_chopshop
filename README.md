@@ -1,6 +1,7 @@
 # Lenzh_chopshop
-Chop shop for ESX
 
+## Note: This readme was written by the original creator, and modified slightly to account for changes having converted the script to QB.
+Chop shop for QB (Converted from ESX and refactored)
 
 Feel free to edit the resource but make sure to pass it through and give me credits ;)  
 
@@ -13,39 +14,24 @@ BrandsPickled for helping me test
 So Big special thanks to those guys.  
 
 ## Requirements
-- es_extended v1.2 or higher (https://github.com/ESX-Org/es_extended)
+- [progressbar](https://github.com/qbcore-framework/progressbar)
+- [QBCore](https://github.com/qbcore-framework)
+    - [qb-core](https://github.com/qbcore-framework/qb-core)
+    - [qb-inventory](https://github.com/qbcore-framework/qb-inventory)
+    - [qb-menu](https://github.com/qbcore-framework/qb-menu)
 
-
-## Download & Installation
-
-### Using [fvm](https://github.com/qlaffont/fvm-installer)
-```
-fvm install --save --folder=esx lenzh/Lenzh_chopshop
-```
-
-### Using Git
-```
-cd resources
-git clone https://github.com/lenzh/Lenzh_chopshop [esx]/Lenzh_chopshop
-```
-
-### Manually
-- Download https://github.com/lenzh/Lenzh_chopshop/archive/lenzh-V2.zip
-- Put it in the `[esx]` directory
 
 ## Installation
-- Import `Lenzh_chopshop.sql` in your database
-- Add this in your `server.cfg`:
 
-```
-start Lenzh_chopshop
-```
+### Manually
+1. Drop the qb-Lenzh_chopshop folder into your [standalone] folder (or whichever other ensured folder you want to use)
+2. Add the items in items.lua to qb-core/shared/items.lua
 
 
 # Support
 Support can be found on my discord
 
-https://discord.gg/sjsT9zV
+https://discord.gg/sjsT9zV (Please note that the original creator did not create this QB version)
 
 Wanna support me visit my patreon
 
