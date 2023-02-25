@@ -1,4 +1,3 @@
--- compatibility wrapper
 fx_version 'cerulean'
 game 'gta5'
 
@@ -7,16 +6,25 @@ author 'Lenzh - Converted to QB by Giana (github.com/Giana)'
 version 'v2'
 
 shared_scripts {
-	'@qb-core/shared/locale.lua',
-	'locales/en.lua',
-	'config.lua'
+    '@qb-core/shared/locale.lua',
+    'locales/en.lua',
+    'config.lua'
 }
 
 server_scripts {
-	'@oxmysql/lib/MySQL.lua',
-	'server/sv_main.lua'
+    '@oxmysql/lib/MySQL.lua',
+    'server/sv_main.lua'
 }
 
 client_scripts {
-	'client/cl_main.lua',
+    'client/cl_main.lua',
 }
+
+dependencies {
+    'progressbar',
+    'qb-core',
+    'qb-inventory',
+    'qb-menu'
+}
+
+lua54 'yes'
