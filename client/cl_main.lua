@@ -1,73 +1,31 @@
-ESX = nil
-local PlayerData, Timer, HasAlreadyEnteredMarker, ChoppingInProgress, LastZone, isDead, pedIsTryingToChopVehicle, menuOpen  = {}, 0, false, false, nil, false, false, false
-local CurrentAction, CurrentActionMsg, CurrentActionData, menuOpen, isPlayerWhitelisted  = nil, '', {}, false, false
+local QBCore = exports['qb-core']:GetCoreObject()
+local Timer, HasAlreadyEnteredMarker, ChoppingInProgress, LastZone, isDead, pedIsTryingToChopVehicle, menuOpen = 0, false, false, nil, false, false, false
+local CurrentAction, CurrentActionMsg, CurrentActionData, menuOpen = nil, '', {}, false
 local timing = math.ceil(Config.Timer * 60000)
 
-Citizen.CreateThread(function()
-    while ESX == nil do
-        TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-        Citizen.Wait(0)
-    end
-
-    while ESX.GetPlayerData().job == nil do
-        Citizen.Wait(10)
-    end
-
-    PlayerData = ESX.GetPlayerData()
-
-    isPlayerWhitelisted = refreshPlayerWhitelisted()
-
-end)
-
-RegisterNetEvent('esx:setJob')
-AddEventHandler('esx:setJob', function(job)
-    ESX.PlayerData.job = job
-
-    isPlayerWhitelisted = refreshPlayerWhitelisted()
-end)
-
-AddEventHandler('esx:onPlayerDeath', function(data)
-    isDead = true
-    ESX.UI.Menu.CloseAll()
-end)
+function DrawText3Ds(x, y, z, text)
+    SetTextScale(0.35, 0.35)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextColour(255, 255, 255, 215)
+    SetTextEntry('STRING')
+    SetTextCentre(true)
+    AddTextComponentString(text)
+    SetDrawOrigin(x, y, z, 0)
+    DrawText(0.0, 0.0)
+    local factor = (string.len(text)) / 370
+    DrawRect(0.0, 0.0 + 0.0125, 0.017 + factor, 0.03, 0, 0, 0, 75)
+    ClearDrawOrigin()
+end
 
 function IsDriver()
-    return GetPedInVehicleSeat(GetVehiclePedIsIn(PlayerPedId(), false), - 1) == PlayerPedId()
+    return GetPedInVehicleSeat(GetVehiclePedIsIn(PlayerPedId(), false), -1) == PlayerPedId()
 end
 
 function MaxSeats(vehicle)
     local vehpas = GetVehicleNumberOfPassengers(vehicle)
     return vehpas
 end
-
-
-AddEventHandler('onResourceStop', function(resource)
-    if resource == GetCurrentResourceName() then
-        if menuOpen then
-            ESX.UI.Menu.CloseAll()
-        end
-    end
-end)
-
-function refreshPlayerWhitelisted()
-
-    if not ESX.PlayerData then
-        return false
-    end
-
-    if not ESX.PlayerData.job then
-        return false
-    end
-
-    for k,v in ipairs(Config.WhitelistedCops) do
-        if v == ESX.PlayerData.job.name then
-            return true
-        end
-    end
-
-    return false
-end
-
 
 -- Display Marker
 Citizen.CreateThread(function()
@@ -77,7 +35,7 @@ Citizen.CreateThread(function()
         local playerCoords = GetEntityCoords(playerPed)
         local letSleep = true
 
-        for k,v in pairs(Config.Zones) do
+        for k, v in pairs(Config.Zones) do
             local distance = GetDistanceBetweenCoords(playerCoords, v.Pos.x, v.Pos.y, v.Pos.z, true)
             if Config.MarkerType ~= -1 and distance < Config.DrawDistance then
                 DrawMarker(Config.MarkerType, v.Pos.x, v.Pos.y, v.Pos.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.Size.x, v.Size.y, v.Size.z, Config.MarkerColor.r, Config.MarkerColor.g, Config.MarkerColor.b, 100, false, true, 2, false, nil, nil, false)
@@ -105,7 +63,7 @@ end
 
 Citizen.CreateThread(function()
     if Config.EnableBlips == true then
-        for k,zone in pairs(Config.Zones) do
+        for k, zone in pairs(Config.Zones) do
             CreateBlipCircle(zone.coords, zone.name, zone.radius, zone.color, zone.sprite)
         end
     end
@@ -118,20 +76,20 @@ Citizen.CreateThread(function()
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
 
-        local isInMarker  = false
+        local isInMarker = false
         local currentZone = nil
         local letSleep = true
-        for k,v in pairs(Config.Zones) do
+        for k, v in pairs(Config.Zones) do
             local distance = GetDistanceBetweenCoords(playerCoords, v.Pos.x, v.Pos.y, v.Pos.z, true)
             if distance < v.Size.x then
-                isInMarker  = true
+                isInMarker = true
                 currentZone = k
             end
 
         end
         if (isInMarker and not HasAlreadyEnteredMarker) or (isInMarker and LastZone ~= currentZone) then
             HasAlreadyEnteredMarker = true
-            LastZone                = currentZone
+            LastZone = currentZone
             TriggerEvent('Lenzh_chopshop:hasEnteredMarker', currentZone)
         end
 
@@ -144,22 +102,36 @@ end)
 
 AddEventHandler('Lenzh_chopshop:hasEnteredMarker', function(zone)
     if zone == 'Chopshop' and IsDriver() then
-        CurrentAction     = 'Chopshop'
-        CurrentActionMsg  = _U('press_to_chop')
+        CurrentAction = 'Chopshop'
+        CurrentActionMsg = Lang:t('press_to_chop')
         CurrentActionData = {}
     elseif zone == 'StanleyShop' then
-        CurrentAction     = 'StanleyShop'
-        CurrentActionMsg  = _U('open_shop')
+        CurrentAction = 'StanleyShop'
+        CurrentActionMsg = Lang:t('open_shop')
         CurrentActionData = {}
     end
 end)
 
 AddEventHandler('Lenzh_chopshop:hasExitedMarker', function(zone)
     if menuOpen then
-        ESX.UI.Menu.CloseAll()
+        exports['qb-menu']:closeMenu()
+        exports['qb-core']:HideText()
     end
 
     CurrentAction = nil
+end)
+
+AddEventHandler('Lenzh_chopshop:client:closeMenu', function()
+    menuOpen = false
+    CurrentAction = 'StanleyShop'
+    CurrentActionMsg = Lang:t('open_shop')
+    CurrentActionData = {}
+    exports['qb-menu']:closeMenu()
+end)
+
+RegisterNetEvent('Lenzh_chopshop:client:openMenu')
+AddEventHandler('Lenzh_chopshop:client:openMenu', function()
+    OpenShopMenu()
 end)
 
 
@@ -168,16 +140,20 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
         if CurrentAction ~= nil then
-            ESX.ShowHelpNotification(CurrentActionMsg, true, true)
-            if IsControlJustReleased(0, 38) then
-                if IsDriver() then
-                    if CurrentAction == 'Chopshop' then
+            if IsDriver() then
+                if CurrentAction == 'Chopshop' then
+                    DrawText3Ds(Config.Zones['Chopshop'].coords.x, Config.Zones['Chopshop'].coords.y, Config.Zones['Chopshop'].coords.z + 0.9, CurrentActionMsg)
+                    if IsControlJustReleased(0, 38) then
                         ChopVehicle()
+                        CurrentAction = nil
                     end
-                elseif CurrentAction == 'StanleyShop' then
-                    OpenShopMenu()
                 end
-                CurrentAction = nil
+            elseif CurrentAction == 'StanleyShop' then
+                DrawText3Ds(Config.Zones['StanleyShop'].coords.x, Config.Zones['StanleyShop'].coords.y, Config.Zones['StanleyShop'].coords.z + 0.9, CurrentActionMsg)
+                if IsControlJustReleased(0, 38) then
+                    OpenShopMenu()
+                    CurrentAction = nil
+                end
             end
         else
             Citizen.Wait(500)
@@ -200,114 +176,109 @@ Citizen.CreateThread(function()
         SetEntityInvincible(stanley, true)
         FreezeEntityPosition(stanley, true)
         TaskStartScenarioInPlace(stanley, "WORLD_HUMAN_CLIPBOARD", 0, true);
-    else
-
-        print('[Lenzh_chopshop: NPC is turned Off]')
     end
 end)
 
 function ChopVehicle()
-  local ped = PlayerPedId()
-  if IsPedOnAnyBike(ped) then
-    ESX.ShowNotification(_U("no_bikes"), false, true)
-  else
-    local seats = MaxSeats(vehicle)
-    if seats ~= 0 then
-        ESX.ShowNotification(_U("Cannot_Chop_Passengers"), false, true)
-    elseif GetGameTimer() - Timer > Config.CooldownMinutes * 60000 then
-        Timer = GetGameTimer()
-        ESX.TriggerServerCallback('Lenzh_chopshop:anycops', function(anycops)
-            if anycops >= Config.CopsRequired then
-                if Config.CallCops then
-                    local randomReport = math.random(1, Config.CallCopsPercent)
-
-                    if randomReport == Config.CallCopsPercent then
-                        --TriggerEvent('Lenzh_chopshop:StartNotifyPD')
-                        serverid = GetPlayerServerId(PlayerId())
-                        TriggerServerEvent('Lenzh_chopshop:GetPlayerID', serverid)
-                        pedIsTryingToChopVehicle = true
-                    end
-                end
-                local ped = PlayerPedId()
-                local vehicle = GetVehiclePedIsIn( ped, false )
-                ChoppingInProgress = true
-                VehiclePartsRemoval()
-                if not HasAlreadyEnteredMarker then
-                    HasAlreadyEnteredMarker = true
-                    ChoppingInProgress = false
-                    ESX.ShowNotification(_U'ZoneLeft', false, true)
-
-                    SetVehicleAlarmTimeLeft(vehicle, 60000)
-                end
-            else
-                ESX.ShowNotification(_U('not_enough_cops'))
-            end
-        end)
+    local ped = PlayerPedId()
+    if IsPedOnAnyBike(ped) then
+        QBCore.Functions.Notify(Lang:t('no_bikes'))
     else
-        local timerNewChop = Config.CooldownMinutes * 60000 - (GetGameTimer() - Timer)
-        local TotalTime = math.floor(timerNewChop / 60000)
-        if TotalTime >= 0 then
-            ESX.ShowNotification("Comeback in " ..TotalTime.. " minute(s)")
-        elseif TotalTime <= 0 then
-            ESX.ShowNotification(_U('cooldown'.. TotalTime))
+        local seats = MaxSeats(vehicle)
+        if seats ~= 0 then
+            QBCore.Functions.Notify(Lang:t('Cannot_Chop_Passengers'))
+        elseif GetGameTimer() - Timer > Config.CooldownMinutes * 60000 then
+            Timer = GetGameTimer()
+            QBCore.Functions.TriggerCallback('Lenzh_chopshop:anycops', function(anycops)
+                if anycops >= Config.CopsRequired then
+                    if Config.CallCops then
+                        local randomReport = math.random(1, Config.CallCopsPercent)
+
+                        if randomReport == Config.CallCopsPercent then
+                            TriggerEvent('Lenzh_chopshop:StartNotifyPD')
+                            pedIsTryingToChopVehicle = true
+                        end
+                    end
+                    local ped = PlayerPedId()
+                    local vehicle = GetVehiclePedIsIn(ped, false)
+                    ChoppingInProgress = true
+                    VehiclePartsRemoval()
+                    if not HasAlreadyEnteredMarker then
+                        HasAlreadyEnteredMarker = true
+                        ChoppingInProgress = false
+                        QBCore.Functions.Notify(Lang:t('ZoneLeft'))
+
+                        SetVehicleAlarmTimeLeft(vehicle, 60000)
+                    end
+                else
+                    QBCore.Functions.Notify(Lang:t('not_enough_cops'))
+                end
+            end)
+        else
+            local timerNewChop = Config.CooldownMinutes * 60000 - (GetGameTimer() - Timer)
+            local TotalTime = math.floor(timerNewChop / 60000)
+            if TotalTime >= 0 then
+                QBCore.Functions.Notify('Comeback in ' .. TotalTime .. ' minute(s)')
+            elseif TotalTime <= 0 then
+                QBCore.Functions.Notify(Lang:t('cooldown', { seconds = TotalTime }))
+            end
         end
     end
-  end
 end
 
 function VehiclePartsRemoval()
     local ped = PlayerPedId()
-    local vehicle = GetVehiclePedIsIn( ped, false )
+    local vehicle = GetVehiclePedIsIn(ped, false)
     local rearLeftDoor = GetEntityBoneIndexByName(GetVehiclePedIsIn(GetPlayerPed(-1), false), 'door_dside_r')
     local bonnet = GetEntityBoneIndexByName(GetVehiclePedIsIn(GetPlayerPed(-1), false), 'bonnet')
     local boot = GetEntityBoneIndexByName(GetVehiclePedIsIn(GetPlayerPed(-1), false), 'boot')
     SetVehicleEngineOn(vehicle, false, false, true)
     SetVehicleUndriveable(vehicle, false)
     if ChoppingInProgress == true then
-        ESX.ShowNotification("Opening Front Left Door")
+        QBCore.Functions.Notify("Opening Front Left Door", "primary", Config.RemovePart)
         Citizen.Wait(Config.RemovePart)
         SetVehicleDoorOpen(GetVehiclePedIsIn(ped, false), 0, false, false)
     end
     Citizen.Wait(1000)
     if ChoppingInProgress == true then
-        ESX.ShowNotification("Removing Front Left Door")
+        QBCore.Functions.Notify("Removing Front Left Door", "primary", Config.RemovePart)
         Citizen.Wait(Config.RemovePart)
         SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false), 0, true)
     end
     Citizen.Wait(1000)
     if ChoppingInProgress == true then
-        ESX.ShowNotification("Opening Front Right Door")
+        QBCore.Functions.Notify("Opening Front Right Door", "primary", Config.RemovePart)
         Citizen.Wait(Config.RemovePart)
         SetVehicleDoorOpen(GetVehiclePedIsIn(ped, false), 1, false, false)
     end
     Citizen.Wait(1000)
     if ChoppingInProgress == true then
-        ESX.ShowNotification("Removing Front Right Door")
+        QBCore.Functions.Notify("Removing Front Right Door", "primary", Config.RemovePart)
         Citizen.Wait(Config.RemovePart)
         SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false), 1, true)
     end
     Citizen.Wait(1000)
     if rearLeftDoor ~= -1 then
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Opening Rear Left Door")
+            QBCore.Functions.Notify("Opening Rear Left Door", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
             SetVehicleDoorOpen(GetVehiclePedIsIn(ped, false), 2, false, false)
         end
         Citizen.Wait(1000)
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Removing Rear Left Door")
+            QBCore.Functions.Notify("Removing Rear Left Door", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
             SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false), 2, true)
         end
         Citizen.Wait(1000)
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Opening Rear Right Door")
+            QBCore.Functions.Notify("Opening Rear Right Door", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
             SetVehicleDoorOpen(GetVehiclePedIsIn(ped, false), 3, false, false)
         end
         Citizen.Wait(1000)
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Removing Rear Right Door")
+            QBCore.Functions.Notify("Removing Rear Right Door", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
             SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false), 3, true)
         end
@@ -315,45 +286,55 @@ function VehiclePartsRemoval()
     Citizen.Wait(1000)
     if bonnet ~= -1 then
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Opening Hood")
+            QBCore.Functions.Notify("Opening Hood", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
             SetVehicleDoorOpen(GetVehiclePedIsIn(ped, false), 4, false, false)
         end
         Citizen.Wait(1000)
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Removing Hood")
+            QBCore.Functions.Notify("Removing Hood", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
-            SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false),4, true)
+            SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false), 4, true)
         end
     end
     Citizen.Wait(1000)
     if boot ~= -1 then
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Opening Trunk")
+            QBCore.Functions.Notify("Opening Trunk", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
             SetVehicleDoorOpen(GetVehiclePedIsIn(ped, false), 5, false, false)
         end
         Citizen.Wait(1000)
         if ChoppingInProgress == true then
-            ESX.ShowNotification("Removing Trunk")
+            QBCore.Functions.Notify("Removing Trunk", "primary", Config.RemovePart)
             Citizen.Wait(Config.RemovePart)
-            SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false),5, true)
+            SetVehicleDoorBroken(GetVehiclePedIsIn(ped, false), 5, true)
         end
     end
     Citizen.Wait(1000)
-    ESX.ShowNotification("Let John take care of the car if allowed!")
+    QBCore.Functions.Notify("Let John take care of the car if allowed!")
     Citizen.Wait(Config.RemovePart)
     if ChoppingInProgress == true then
-        local vehicle =  GetVehiclePedIsIn( ped, false )
+        local vehicle = GetVehiclePedIsUsing(ped)
         if vehicle then
             local vehPlate = GetVehicleNumberPlateText(vehicle)
-            ESX.TriggerServerCallback('Lenzh_chopshop:OwnedCar', function(owner)
+            QBCore.Functions.TriggerCallback('Lenzh_chopshop:OwnedCar', function(owner)
                 if owner then
-                    ESX.ShowNotification("Your Personal Vehicle is Chopped Successfully...", false, true, g)
+                    QBCore.Functions.Notify("Your Personal Vehicle is Chopped Successfully...")
+                    SetEntityAsMissionEntity(vehicle, true, true)
                     DeleteVehicle(vehicle)
+                    Citizen.Wait(250)
+                    if IsPedInAnyVehicle(ped) then
+                        DeleteVehicle(vehicle)
+                    end
                 else
-                    ESX.ShowNotification("Vehicle Chopped Successfully...", false, true, g)
+                    QBCore.Functions.Notify("Vehicle Chopped Successfully...")
+                    SetEntityAsMissionEntity(vehicle, true, true)
                     DeleteVehicle(vehicle)
+                    Citizen.Wait(250)
+                    if IsPedInAnyVehicle(ped) then
+                        DeleteVehicle(vehicle)
+                    end
                 end
             end, vehPlate)
         end
@@ -362,56 +343,43 @@ function VehiclePartsRemoval()
 end
 
 function OpenShopMenu()
-    local elements = {}
     menuOpen = true
-
-    for k, v in pairs(ESX.GetPlayerData().inventory) do
-        local price = Config.ItemsPrices[v.name]
-
-        if price and v.count > 0 then
-            table.insert(elements, {
-                label = ('%s - <span style="color:green;">%s</span>'):format(v.label, _U('item', ESX.Math.GroupDigits(price))),
-                name = v.name,
-                price = price,
-
-                -- menu properties
-                type = 'slider',
-                value = 1,
-                min = 1,
-                max = v.count
-            })
-        end
-    end
-    ESX.UI.Menu.CloseAll()
-    ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'car_shop', {
-        title    = _U('shop_title'),
-        align    = 'right',
-        elements = elements
-    }, function(data, menu)
-
-        ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'shop_confirm', {
-            title    = _U('shop_confirm', data.current.value, data.current.label_real, ESX.Math.GroupDigits(data.current.price * data.current.value)),
-            align    = 'right',
-            elements = {
-                {label = _U('no'),  value = 'no'},
-                {label = _U('yes'), value = 'yes'}
-            }
-        }, function(data2, menu2)
-            if data2.current.value == 'yes' then
-                TriggerServerEvent('Lenzh_chopshop:sell', data.current.name, data.current.value)
+    local menu = {
+        {
+            header = Lang:t('shop_title'),
+            isMenuHeader = true
+        }
+    }
+    QBCore.Functions.TriggerCallback('Lenzh_chopshop:server:getSellableItems', function(sellableItems)
+        if sellableItems and #sellableItems > 0 then
+            for k, v in pairs(sellableItems) do
+                menu[#menu + 1] = {
+                    header = v.label,
+                    txt = '$' .. v.price,
+                    params = {
+                        isServer = true,
+                        event = 'Lenzh_chopshop:server:sellItem',
+                        args = {
+                            item = v
+                        }
+                    }
+                }
             end
-
-            menu2.close()
-        end, function(data2, menu2)
-            menu2.close()
-        end)
-    end, function(data, menu)
-        menu.close()
-        menuOpen = false
-        CurrentAction     = 'StanleyShop'
-        CurrentActionMsg  = _U('open_shop')
-        CurrentActionData = {}
+        else
+            QBCore.Functions.Notify(Lang:t('no_items'), 'error')
+            return
+        end
     end)
+    while menu[2] == nil do
+        Wait(100)
+    end
+    menu[#menu + 1] = {
+        header = Lang:t('exit_menu'),
+        params = {
+            event = 'Lenzh_chopshop:client:closeMenu'
+        }
+    }
+    exports['qb-menu']:openMenu(menu)
 end
 
 Citizen.CreateThread(function()
@@ -423,15 +391,17 @@ Citizen.CreateThread(function()
 
         Citizen.Wait(3000)
         if pedIsTryingToChopVehicle then
-            if (isPlayerWhitelisted and Config.ShowCopsMisbehave) or not isPlayerWhitelisted then
-                DecorSetInt(playerPed, 'Chopping', 2)
+            QBCore.Functions.TriggerCallback('Lenzh_chopshop:server:isWhitelisted', function(isWhitelisted)
+                if (isWhitelisted and Config.ShowCopsMisbehave) or not isWhitelisted then
+                    DecorSetInt(playerPed, 'Chopping', 2)
 
-                TriggerServerEvent('Lenzh_chopshop:NotifPos', {
-                    x = ESX.Math.Round(playerCoords.x, 1),
-                    y = ESX.Math.Round(playerCoords.y, 1),
-                    z = ESX.Math.Round(playerCoords.z, 1)
-                })
-            end
+                    TriggerServerEvent('Lenzh_chopshop:NotifPos', {
+                        x = math.floor(playerCoords.x),
+                        y = math.floor(playerCoords.y),
+                        z = math.floor(playerCoords.z)
+                    })
+                end
+            end)
         end
     end
 end)
@@ -449,41 +419,37 @@ Citizen.CreateThread(function()
     end
 end)
 
-
-
-
 RegisterNetEvent('Lenzh_chopshop:StartNotifyPD')
-AddEventHandler('Lenzh_chopshop:StartNotifyPD', function(serverid)
-    local serverid = GetPlayerPed(GetPlayerFromServerId(serverid))
-    local mugshot, mugshotStr = ESX.Game.GetPedMugshot(serverid)
-    ESX.ShowAdvancedNotification(_U('911'), _U('chop'), _U('call'), mugshotStr, 1)
+AddEventHandler('Lenzh_chopshop:StartNotifyPD', function()
+    TriggerServerEvent('police:server:policeAlert', Lang:t('call'))
     PlaySoundFrontend(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0)
-    UnregisterPedheadshot(mugshot)
 end)
 
 RegisterNetEvent('Lenzh_chopshop:NotifPosProgress')
 AddEventHandler('Lenzh_chopshop:NotifPosProgress', function(targetCoords)
-    if isPlayerWhitelisted then
-        local alpha = 250
-        local ChopBlip = AddBlipForRadius(targetCoords.x, targetCoords.y, targetCoords.z, 50.0)
+    QBCore.Functions.TriggerCallback('Lenzh_chopshop:server:isWhitelisted', function(isWhitelisted)
+        if isWhitelisted then
+            local alpha = 250
+            local ChopBlip = AddBlipForRadius(targetCoords.x, targetCoords.y, targetCoords.z, 50.0)
 
-        SetBlipHighDetail(ChopBlip, true)
-        SetBlipColour(ChopBlip, 17)
-        SetBlipAlpha(ChopBlip, alpha)
-        SetBlipAsShortRange(ChopBlip, true)
-
-        while alpha ~= 0 do
-            Citizen.Wait(5 * 4)
-            alpha = alpha - 1
+            SetBlipHighDetail(ChopBlip, true)
+            SetBlipColour(ChopBlip, 17)
             SetBlipAlpha(ChopBlip, alpha)
+            SetBlipAsShortRange(ChopBlip, true)
 
-            if alpha == 0 then
-                RemoveBlip(ChopBlip)
-                pedIsTryingToChopVehicle = false
-                return
+            while alpha ~= 0 do
+                Citizen.Wait(5 * 4)
+                alpha = alpha - 1
+                SetBlipAlpha(ChopBlip, alpha)
+
+                if alpha == 0 then
+                    RemoveBlip(ChopBlip)
+                    pedIsTryingToChopVehicle = false
+                    return
+                end
             end
         end
-    end
+    end)
 end)
 
 Citizen.CreateThread(function()

@@ -9,7 +9,7 @@ Config.MarkerColor = { r = 255, g = 0, b = 0 } -- Change the marker color.
 -- Set the time (in minutes) during the player is markered
 Config.Timer = 2
 
-Config.CooldownMinutes = 10
+Config.CooldownMinutes = .5
 
 Config.CallCops = true -- Set to true if you want cops to be alerted when chopping is in progress
 Config.CallCopsPercent = 1 -- (min1) if 1 then cops will be called every time=100%, 2=50%, 3=33%, 4=25%, 5=20%.
@@ -22,50 +22,48 @@ Config.NPCShop = { x = -55.42, y = 6392.8, z = 30.5, h = 46.0 } -- Location of t
 
 Config.RemovePart = 1000
 
-Config.GiveBlack = true --- Give dirty cash
+Config.GiveBlack = false --- Give dirty cash
 Config.AnyoneCanChop = true -- Pesonal Cars chop ### CAUTION WILL DELETE VEHICLES FROM DATABASE
 
 Config.Zones = {
-  Chopshop = {coords = vector3(-555.22, - 1697.99, 18.75 + 0.99), name = _U('map_blip'), color = 49, sprite = 225, radius = 100.0, Pos = { x = -555.22, y = -1697.99, z = 19.13 - 0.95 }, Size = { x = 5.0, y = 5.0, z = 0.5 }, },
-  StanleyShop = {coords = vector3(-55.42, 6392.8, 30.5), name = _U('map_blip_shop'), color = 50, sprite = 120, radius = 25.0, Pos = { x = -55.42, y = 6392.8, z = 30.5}, Size = { x = 3.0, y = 3.0, z = 1.0 }, },
-
+    Chopshop = { coords = vector3(-555.22, -1697.99, 18.75 + 0.99), name = Lang:t('map_blip'), color = 49, sprite = 225, radius = 100.0, Pos = { x = -555.22, y = -1697.99, z = 19.13 - 0.95 }, Size = { x = 5.0, y = 5.0, z = 0.5 }, },
+    StanleyShop = { coords = vector3(-55.42, 6392.8, 30.5), name = Lang:t('map_blip_shop'), color = 50, sprite = 120, radius = 25.0, Pos = { x = -55.42, y = 6392.8, z = 30.5 }, Size = { x = 3.0, y = 3.0, z = 1.0 }, },
 }
 
 Config.Items = {
-  -- Item and Price $
-  "battery",
-  "muffler",
-  "hood",
-  "trunk",
-  "doors",
-  "engine",
-  "waterpump",
-  "oilpump",
-  "speakers",
-  "radio",
-  "rims",
-  "subwoofer",
-  "steeringwheel"
+    -- Item and Price $
+    "battery",
+    "muffler",
+    "hood",
+    "trunk",
+    "doors",
+    "engine",
+    "waterpump",
+    "oilpump",
+    "speakers",
+    "car_radio",
+    "rims",
+    "subwoofer",
+    "steeringwheel"
 }
 
-
 Config.ItemsPrices = {
-  -- Item and Price $
-  battery = 50,
-  muffler = 180,
-  hood = 325,
-  trunk = 300,
-  doors = 185,
-  engine = 680,
-  waterpump = 260,
-  oilpump = 240,
-  speakers = 165,
-  radio = 200,
-  rims = 700,
-  subwoofer = 120,
-  steeringwheel = 100
+    -- Item and Price $
+    battery = 50,
+    muffler = 180,
+    hood = 325,
+    trunk = 300,
+    doors = 185,
+    engine = 680,
+    waterpump = 260,
+    oilpump = 240,
+    speakers = 165,
+    car_radio = 200,
+    rims = 700,
+    subwoofer = 120,
+    steeringwheel = 100
 }
 -- Jobs in this table are considered as cops
 Config.WhitelistedCops = {
-  'police'
+    'police'
 }
