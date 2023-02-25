@@ -1,24 +1,30 @@
--- compatibility wrapper
-fx_version 'adamant'
+fx_version 'cerulean'
 game 'gta5'
 
 description 'Lenzh Chop Shop'
-author 'Lenzh'
+author 'Lenzh - Converted to QB by Giana (github.com/Giana)'
 version 'v2'
 
-server_scripts {
-	'@es_extended/locale.lua',
-	'@mysql-async/lib/MySQL.lua',
-	'locales/*',
+shared_scripts {
+    '@qb-core/shared/locale.lua',
+    'locales/en.lua',
+    'config.lua'
+}
 
-	'config.lua',
-	'server/*',
+server_scripts {
+    '@oxmysql/lib/MySQL.lua',
+    'server/sv_main.lua'
 }
 
 client_scripts {
-	'@es_extended/locale.lua',
-	'locales/*',
-
-	'config.lua',
-	'client/*',
+    'client/cl_main.lua',
 }
+
+dependencies {
+    'progressbar',
+    'qb-core',
+    'qb-inventory',
+    'qb-menu'
+}
+
+lua54 'yes'
