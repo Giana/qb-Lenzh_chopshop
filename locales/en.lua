@@ -7,6 +7,7 @@ local Translations = {
     not_enough = 'You do not have enough of that to sell!',
     shop_title = 'Stanley\'s Car Parts',
     shop_subtext = 'Sell your car parts here!',
+    shop_subtext_rewards = 'Sell your car parts here! We might have some items to trade, too.',
     come_back_in = 'Come back in %{minutes} minute(s)',
     minute = 'Come back in less than a minute',
     call = 'Vehicle chopping in progress',

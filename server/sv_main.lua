@@ -1,5 +1,21 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+-- Functions --
+
+function rewardItems(source, items)
+    local src = source
+    local player = QBCore.Functions.GetPlayer(src)
+    for k, v in pairs(items) do
+        if Config.SellAll then
+            player.Functions.AddItem(v.name, v.totalAmount)
+            TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[v.name], 'add', v.totalAmount)
+        else
+            player.Functions.AddItem(v.name, v.amount)
+            TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[v.name], 'add', v.amount)
+        end
+    end
+end
+
 -- Events --
 
 RegisterServerEvent('Lenzh_chopshop:NotifPos')
@@ -14,7 +30,7 @@ AddEventHandler('Lenzh_chopshop:ChopRewards', function(rewards)
     for i = 1, 3, 1 do
         local chance = math.random(1, #Config.Items)
         local amount = math.random(1, 3)
-        local myItem = Config.Items[chance]
+        local myItem = Config.Items[chance].name
 
         if player.Functions.AddItem(myItem, amount) then
             TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[myItem], 'add', amount)
@@ -52,6 +68,9 @@ AddEventHandler('Lenzh_chopshop:server:sellItem', function(data)
             TriggerClientEvent('QBCore:Notify', src, Lang:t('not_enough'), 'error')
         end
     end
+    if item.rewardItems and #item.rewardItems > 0 then
+        rewardItems(src, item.rewardItems)
+    end
     TriggerClientEvent('Lenzh_chopshop:client:openMenu', src)
 end)
 
@@ -85,14 +104,27 @@ QBCore.Functions.CreateCallback('Lenzh_chopshop:server:getSellableItems', functi
     local player = QBCore.Functions.GetPlayer(src)
     local items = {}
     for k, v in pairs(Config.Items) do
-        local hasItem = player.Functions.GetItemByName(v)
+        local hasItem = player.Functions.GetItemByName(v.name)
         if hasItem and hasItem.amount > 0 then
             local item = {}
-            item.name = v
-            item.label = QBCore.Shared.Items[v]['label']
-            item.price = Config.ItemsPrices[v]
+            local rewardItems = {}
+            item.name = v.name
+            item.label = QBCore.Shared.Items[v.name]['label']
+            item.price = v.price
             item.amount = hasItem.amount
-            item.totalPrice = hasItem.amount * Config.ItemsPrices[v]
+            item.totalPrice = hasItem.amount * v.price
+            if Config.EnableItemRewards then
+                for k2, v2 in pairs(v.item_sale_rewards) do
+                    if v2 > 0 then
+                        local rewardItem = {}
+                        rewardItem.name = k2
+                        rewardItem.amount = v2
+                        rewardItem.totalAmount = v2 * item.amount
+                        table.insert(rewardItems, rewardItem)
+                    end
+                end
+            end
+            item.rewardItems = rewardItems
             table.insert(items, item)
         end
     end
