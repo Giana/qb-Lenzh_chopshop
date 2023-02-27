@@ -362,8 +362,8 @@ Citizen.CreateThread(function()
 end)
 
 Citizen.CreateThread(function()
-    if Config.EnableBlips == true then
-        for k, zone in pairs(Config.Zones) do
+    for k, zone in pairs(Config.Zones) do
+        if zone.blipEnabled then
             CreateBlipCircle(zone.coords, zone.name, zone.radius, zone.color, zone.sprite)
         end
     end
@@ -378,7 +378,7 @@ Citizen.CreateThread(function()
         local letSleep = true
         for k, v in pairs(Config.Zones) do
             local distance = GetDistanceBetweenCoords(playerCoords, v.Pos.x, v.Pos.y, v.Pos.z, true)
-            if Config.MarkerType ~= -1 and distance < Config.DrawDistance then
+            if v.markerEnabled and Config.MarkerType ~= -1 and distance < Config.DrawDistance then
                 DrawMarker(Config.MarkerType, v.Pos.x, v.Pos.y, v.Pos.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, v.Size.x, v.Size.y, v.Size.z, Config.MarkerColor.r, Config.MarkerColor.g, Config.MarkerColor.b, 100, false, true, 2, false, nil, nil, false)
                 letSleep = false
             end

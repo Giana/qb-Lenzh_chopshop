@@ -3,7 +3,7 @@ game 'gta5'
 
 description 'Lenzh Chop Shop'
 author 'Lenzh - Converted to QB by Giana (github.com/Giana)'
-version 'v2'
+version '2.1.0'
 
 shared_scripts {
     '@qb-core/shared/locale.lua',
