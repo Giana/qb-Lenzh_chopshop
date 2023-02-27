@@ -42,14 +42,26 @@ function CreateBlipCircle(coords, text, radius, color, sprite)
 end
 
 function OpenShopMenu()
+    local menu = {}
     MenuOpen = true
-    local menu = {
-        {
-            header = Lang:t('shop_title'),
-            txt = Lang:t('shop_subtext'),
-            isMenuHeader = true
+    if Config.EnableItemRewards then
+        menu = {
+            {
+                header = Lang:t('shop_title'),
+                txt = Lang:t('shop_subtext_rewards'),
+                isMenuHeader = true
+            }
         }
-    }
+    else
+        menu = {
+            {
+                header = Lang:t('shop_title'),
+                txt = Lang:t('shop_subtext'),
+                isMenuHeader = true
+            }
+        }
+    end
+
     QBCore.Functions.TriggerCallback('Lenzh_chopshop:server:getSellableItems', function(sellableItems)
         if sellableItems and #sellableItems > 0 then
             for k, v in pairs(sellableItems) do

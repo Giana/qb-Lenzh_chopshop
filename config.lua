@@ -18,6 +18,7 @@ Config.NPCShop = { x = -55.42, y = 6392.8, z = 30.5, h = 46.0 }     -- Location 
 
 Config.RemovePart = 2                    -- Seconds to remove part
 
+Config.EnableItemRewards = true          -- true == item rewards for selling enabled, false == item rewards for selling disabled
 Config.SellAll = true                    -- true == sell all of item when clicked in menu, false == sell 1 of item when clicked in menu
 Config.MoneyType = 'cash'                -- Money type to reward for sold parts
 
@@ -29,39 +30,128 @@ Config.Zones = {
     StanleyShop = { coords = vector3(-55.42, 6392.8, 30.5), markerEnabled = true, blipEnabled = true, name = Lang:t('map_blip_shop'), color = 50, sprite = 120, radius = 25.0, Pos = { x = -55.42, y = 6392.8, z = 30.5 }, Size = { x = 3.0, y = 3.0, z = 1.0 }, },
 }
 
--- Item rewards
+--[[
+    For each Config.Items[x]:
+    - name: Name of item reward for chopping
+    - price: Sale price
+    - item_sale_rewards:
+        - ['itemName'] (name of item) = itemAmount (amount of item to reward per 1 parent item sold)
+    - Example:
+        - [10] = {
+              name = 'car_radio',
+              price = math.random(170, 230),
+              item_sale_rewards = {
+                  ['plastic'] = math.random(0, 1),
+                  ['aluminum'] = 3
+               }
+           }
+            - For every 'car_radio' item sold, $170-$230 will be rewarded, plus 0-1 'plastic' and 3 'aluminum' (if Config.EnableItemRewards == true)
+]]
 Config.Items = {
-    'battery',
-    'muffler',
-    'hood',
-    'trunk',
-    'doors',
-    'engine',
-    'waterpump',
-    'oilpump',
-    'speakers',
-    'car_radio',
-    'rims',
-    'subwoofer',
-    'steeringwheel'
+    [1] = {
+        name = 'battery',
+        price = math.random(40, 60),
+        item_sale_rewards = {
+            ['plastic'] = math.random(0, 1)
+        }
+    },
+    [2] = {
+        name = 'muffler',
+        price = math.random(160, 200),
+        item_sale_rewards = {
+            ['metalscrap'] = math.random(0, 1)
+        }
+    },
+    [3] = {
+        name = 'hood',
+        price = math.random(245, 365),
+        item_sale_rewards = {
+            ['steel'] = math.random(0, 1)
+        }
+    },
+    [4] = {
+        name = 'trunk',
+        price = math.random(260, 340),
+        item_sale_rewards = {
+            ['steel'] = math.random(0, 1)
+        }
+    },
+    [5] = {
+        name = 'doors',
+        price = math.random(165, 205),
+        item_sale_rewards = {
+            ['steel'] = math.random(0, 1),
+            ['glass'] = math.random(0, 1)
+        }
+    },
+    [6] = {
+        name = 'engine',
+        price = math.random(610, 750),
+        item_sale_rewards = {
+            ['plastic'] = math.random(0, 1),
+            ['metalscrap'] = math.random(0, 1),
+            ['copper'] = math.random(0, 1),
+            ['aluminum'] = math.random(0, 1),
+            ['iron'] = math.random(0, 1),
+            ['steel'] = math.random(0, 1),
+            ['rubber'] = math.random(0, 1)
+        }
+    },
+    [7] = {
+        name = 'waterpump',
+        price = math.random(230, 290),
+        item_sale_rewards = {
+            ['aluminum'] = math.random(0, 1)
+        }
+    },
+    [8] = {
+        name = 'oilpump',
+        price = math.random(210, 270),
+        item_sale_rewards = {
+            ['steel'] = math.random(0, 1)
+        }
+    },
+    [9] = {
+        name = 'speakers',
+        price = math.random(145, 185),
+        item_sale_rewards = {
+            ['plastic'] = math.random(0, 1),
+            ['metalscrap'] = math.random(0, 1)
+        }
+    },
+    [10] = {
+        name = 'car_radio',
+        price = math.random(170, 230),
+        item_sale_rewards = {
+            ['plastic'] = math.random(0, 1),
+            ['aluminum'] = math.random(0, 1)
+        }
+    },
+    [11] = {
+        name = 'rims',
+        price = math.random(620, 780),
+        item_sale_rewards = {
+            ['aluminum'] = math.random(0, 1)
+        }
+    },
+    [12] = {
+        name = 'subwoofer',
+        price = math.random(100, 140),
+        item_sale_rewards = {
+            ['plastic'] = math.random(0, 1),
+            ['metalscrap'] = math.random(0, 1)
+        }
+    },
+    [13] = {
+        name = 'steeringwheel',
+        price = math.random(80, 120),
+        item_sale_rewards = {
+            ['plastic'] = math.random(0, 1),
+            ['steel'] = math.random(0, 1)
+        }
+    },
 }
 
--- Item reward sale prices
-Config.ItemsPrices = {
-    battery = 50,
-    muffler = 180,
-    hood = 325,
-    trunk = 300,
-    doors = 185,
-    engine = 680,
-    waterpump = 260,
-    oilpump = 240,
-    speakers = 165,
-    car_radio = 200,
-    rims = 700,
-    subwoofer = 120,
-    steeringwheel = 100
-}
 -- Whitelisted police jobs
 Config.WhitelistedCops = {
     'police'
